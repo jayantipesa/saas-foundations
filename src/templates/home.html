@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p>Hello there, {{ name }}</p>
+    <p>{{ request.user }}</p>
+    <p>{{ request.user.is_authenticated }}</p>
+    {{ block.super }}
+    <p>Page visits: {{ page_visit_count }}</p>
+{% endblock content %}
