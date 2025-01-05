@@ -6,4 +6,6 @@
     <p>{{ request.user.is_authenticated }}</p>
     {{ block.super }}
     <p>Page visits: {{ page_visit_count }}</p>
+    <p>Total page visits: {{ total_page_visit_count }}</p>
+    <p>This page's count percentage: {{ percentage }}%</p>
 {% endblock content %}
