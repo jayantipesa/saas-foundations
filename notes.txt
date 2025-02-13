@@ -34,3 +34,14 @@
             {% endblock content %}
             
         Doing block.super will fetch and append the parent's content as well.
+
+
+    - Whitenoise:
+        whitenoise package is used to efficiently serve static files when your django app is deployed.
+        In the development server, django itself serves the static files (like all those css, js files)
+        but on a production server, when DEBUG = False, django itself won't serve these files because it
+        will greatly impact it's performance. That's why we need a third party to do it efficiently.
+
+        One disadvantage of whitenoise is, you won't be able to upload any kind of user files, your codebase
+        related files to the server or download it. That's why its preferred to use s3 and other services to
+        serve your files instead.
