@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="/register/" method="POST">
+    {% csrf_token %}
+    <input type="text" name="username" placeholder="Pick your Username" required />
+    <input type="text" name="email" placeholder="Email address" required />
+    <input type="password" name="password" placeholder="Password" required />
+
+    <button type="submit" class="text-white bg-green-700 px-5 py-2.5 me-2 mb-2">Register</button>
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+</form>
+
+{% endblock content %}
