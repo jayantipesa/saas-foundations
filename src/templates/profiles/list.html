@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>User permissions for the user {{ user.username }}</div>
+    {% for perm in user.get_all_permissions %}
+        <li>{{ perm }}</li>
+    {% endfor %}
+
+    {% if perms.visits and perms.visits.view_pagevisit %}
+        <div>You have the permission to view this</div>
+    {% endif %}
+
+    <div>Users</div>
+    {% for instance in object_list %}
+        <li><a href="{% url 'profile_detail_view' instance.username %}">{{instance.username}}</a></li>
+    {% endfor %}
+{% endblock content %}
