@@ -81,6 +81,7 @@ INSTALLED_APPS = [
 
     # my-apps
     'commando',
+    'customers',
     'profiles',
     'subscriptions',
     'visits',
