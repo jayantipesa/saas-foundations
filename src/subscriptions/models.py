@@ -30,10 +30,15 @@ class Subscription(models.Model):
             'codename__in': [x[0] for x in  SUBSCRIPTION_PERMISSIONS]
         })
     stripe_id = models.CharField(max_length=120, blank=True, null=True)
+    order = models.IntegerField(default=-1, help_text='Ordering on Pricing page')
+    featured = models.BooleanField(default=True, help_text='Featured on Pricing page')
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.name}'
     class Meta:
+        ordering = ['order', 'featured', '-updated_at']
         permissions = SUBSCRIPTION_PERMISSIONS
 
     def save(self, *args, **kwargs):
@@ -62,6 +67,13 @@ class SubscriptionPrice(models.Model):
                             )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=99.99)
     stripe_id = models.CharField(max_length=120, null=True, blank=True)
+    order = models.IntegerField(default=-1, help_text='Ordering on Pricing page')
+    featured = models.BooleanField(default=True, help_text='Featured on Pricing page')
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['subscription__order', 'order', 'featured', '-updated_at']
 
     @property
     def stripe_currency(self):
@@ -93,6 +105,18 @@ class SubscriptionPrice(models.Model):
             )
             self.stripe_id = stripe_id
         super().save(*args, **kwargs)
+        if self.featured and self.subscription:
+            """
+            set all other prices for this particular subscription and particular
+            interval to featured=False
+            """
+            qs = SubscriptionPrice.objects.filter(
+                subscription=self.subscription,
+                interval=self.interval,
+                featured=True
+            ).exclude(id=self.id)
+            qs.update(featured=False)
+            
 
 
 class UserSubscription(models.Model):
