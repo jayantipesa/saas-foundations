@@ -1,8 +1,9 @@
-from django.db import models
-from django.contrib.auth.models import Group, Permission
-from django.db.models.signals import post_save, pre_save
-
 from django.conf import settings
+from django.contrib.auth.models import Group, Permission
+from django.db import models
+from django.db.models.signals import post_save, pre_save
+from django.urls import reverse
+
 from helpers.billing import create_product, create_price
 
 User = settings.AUTH_USER_MODEL # 'auth.User'
@@ -86,6 +87,9 @@ class SubscriptionPrice(models.Model):
     class Meta:
         ordering = ['subscription__order', 'order', 'featured', '-updated_at']
 
+    def get_checkout_url(self):
+        return reverse('sub-price-checkout', kwargs={'price_id': self.id})
+
     @property
     def display_sub_name(self):
         if not self.subscription:
@@ -152,6 +156,7 @@ class UserSubscription(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subscription = models.ForeignKey(Subscription,
                                      on_delete=models.SET_NULL, null=True, blank=True)
+    stripe_id = models.CharField(max_length=120, blank=True, null=True)
     active = models.BooleanField(default=True)
 
     def __str__(self):

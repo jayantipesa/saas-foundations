@@ -55,3 +55,63 @@ def create_price(
     if raw:
         return response
     return response.id
+
+def start_checkout_session(customer_id,
+                           success_url='',
+                           cancel_url='',
+                           price_stripe_id='',
+                           raw=True
+                        ):
+    """
+        Appending this, so stripe can replace it with session id on success
+        In the success view, we use the session id to retreive payment related information
+    """
+    if not success_url.endswith('?session_id={CHECKOUT_SESSION_ID}'):
+        success_url = f'{success_url}' + '?session_id={CHECKOUT_SESSION_ID}'
+    response = stripe.checkout.Session.create(
+        customer=customer_id,
+        success_url=success_url,
+        cancel_url=cancel_url,
+        line_items=[{'price': price_stripe_id, 'quantity': 1}],
+        mode='subscription'
+    )
+    if not raw:
+        return response.url
+    return response
+
+def get_checkout_session(session_id, raw=True):
+    response = stripe.checkout.Session.retrieve(session_id)
+    if not raw:
+        return response.url
+    return response
+
+def get_subscription_detail(subscription_id, raw=True):
+    response = stripe.Subscription.retrieve(subscription_id)
+    if not raw:
+        return response.url
+    return response
+
+def get_checkout_customer_plan(session_id):
+    """
+        Returns the customer id, chosen plan's price id and the new subscription id
+    """
+    checkout_response = get_checkout_session(session_id)
+    subscription_stripe_id = checkout_response.subscription
+    customer_id = checkout_response.customer
+
+    subscription_reponse = get_subscription_detail(subscription_stripe_id)
+    sub_plan_price_stripe_id = subscription_reponse.plan.id
+
+    return (customer_id, sub_plan_price_stripe_id, subscription_stripe_id)
+
+def cancel_subscription(stripe_id, reason='', feedback='other', raw=True):
+    response = stripe.Subscription.cancel(
+        stripe_id,
+        cancellation_details={
+            'comment': reason,
+            'feedback': feedback
+        }
+    )
+    if not raw:
+        return response.url
+    return response

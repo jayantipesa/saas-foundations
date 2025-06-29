@@ -19,6 +19,7 @@ from django.urls import path, include
 
 from auth import views as auth_views
 from subscriptions import views as subscription_views
+from checkouts import urls as checkout_urls
 from .views import (
     home_view,
     about_view,
@@ -39,5 +40,6 @@ urlpatterns = [
     path('profiles/', include('profiles.urls')),
     path('admin/', admin.site.urls),
     path('pricing/', subscription_views.subscription_price_view, name='pricing'),
-    path('pricing/<str:interval>/', subscription_views.subscription_price_view, name='pricing_detail')
+    path('pricing/<str:interval>/', subscription_views.subscription_price_view, name='pricing_detail'),
+    path('checkout/', include(checkout_urls))
 ]

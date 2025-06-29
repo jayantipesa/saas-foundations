@@ -10,7 +10,6 @@ def download_to_local(url:str, out_path:Path, parent_mkdir:bool=True):
         response = requests.get(url)
         response.raise_for_status()
         # write the file out in binary to prevent any newline conversions
-
         out_path.write_bytes(response.content)
         return True
     except requests.RequestException as e:
