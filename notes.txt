@@ -1,0 +1,36 @@
+------> Template Inheritance
+
+    - When a child template inherits a parent template, the parent template gets access to it's context and request object.
+    - In order for the child template to add additional content apart from what a base template offers, blocks need to be
+        created in parent template. Child template can write it's content inside the same block.
+    - eg:
+        > base.html
+            <body>
+                <h1>Hello from parent</h1>
+
+                {% block content %}
+                    <p>this is default content provided by parent</p>
+                {% endblock content %}
+            </body>
+
+        > home.html (inherits base)
+            {% extends 'base.html' %}
+
+            {% block content %}
+                <p>Hello there, Jayanti</p>
+            {% endblock content %}
+
+        The default content provided by parent inside the block 'content' gets overridden by child template.
+        The blocks are needed to be named as there can be multiple blocks inside a single file.
+
+
+    - In case you don't want to override but actually combine the contents of both parent and child:
+        > home.html (inherits base)
+            {% extends 'base.html' %}
+
+            {% block content %}
+                <p>Hello there, Jayanti</p>
+                {{ block.super }}
+            {% endblock content %}
+            
+        Doing block.super will fetch and append the parent's content as well.
