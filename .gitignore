@@ -2,3 +2,9 @@
 db.sqlite3
 *.pyc
 .env
+
+# ignore vendor static files
+src/staticfiles/vendors
+
+# ignore local static file root
+local-cdn/
