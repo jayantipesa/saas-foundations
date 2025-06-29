@@ -1,6 +1,8 @@
 import stripe
 from decouple import config
 
+from .date_utils import timestamp_as_datetime
+
 DJANGO_DEBUG = config('DJANGO_DEBUG', cast=bool, default=False)
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', cast=str, default='')
 
@@ -9,6 +11,15 @@ if 'sk_test' in STRIPE_SECRET_KEY and not DJANGO_DEBUG:
 
 stripe.api_key = STRIPE_SECRET_KEY
 
+def serialize_subscription_data(data):
+    current_period_start = timestamp_as_datetime(data.current_period_start)
+    current_period_end = timestamp_as_datetime(data.current_period_end)
+    return {
+        'plan_id': data.plan.id,
+        'current_period_start': current_period_start,
+        'current_period_end': current_period_end,
+        'status': data.status
+    }
 
 def create_customer(user, raw=False):
     metadata = {
@@ -95,14 +106,16 @@ def get_checkout_customer_plan(session_id):
     """
         Returns the customer id, chosen plan's price id and the new subscription id
     """
-    checkout_response = get_checkout_session(session_id)
-    subscription_stripe_id = checkout_response.subscription
-    customer_id = checkout_response.customer
+    checkout_session = get_checkout_session(session_id)
+    subscription_stripe_id = checkout_session.subscription
+    subscription_response = get_subscription_detail(subscription_stripe_id)
+    subscription_data = serialize_subscription_data(subscription_response)
 
-    subscription_reponse = get_subscription_detail(subscription_stripe_id)
-    sub_plan_price_stripe_id = subscription_reponse.plan.id
-
-    return (customer_id, sub_plan_price_stripe_id, subscription_stripe_id)
+    return {
+        'customer_id': checkout_session.customer,
+        'stripe_id': subscription_stripe_id,
+        **subscription_data
+    }
 
 def cancel_subscription(stripe_id, reason='', feedback='other', raw=True):
     response = stripe.Subscription.cancel(

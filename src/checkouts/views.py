@@ -52,7 +52,9 @@ def checkout_redirect_view(request):
 
 def checkout_finalize_view(request):
     session_id = request.GET.get('session_id')
-    customer_id, plan_id, sub_stripe_id = get_checkout_customer_plan(session_id)
+    checkout_data = get_checkout_customer_plan(session_id)
+    plan_id = checkout_data.pop('plan_id')
+    customer_id = checkout_data.pop('customer_id')
     try:
         # reverse relationship from Subscription to SubscriptionPrice
         user_obj = User.objects.get(customer__stripe_id=customer_id)
@@ -62,6 +64,12 @@ def checkout_finalize_view(request):
     except Subscription.DoesNotExist:
         return HttpResponseBadRequest('Provided subscription plan is invalid.')
 
+    user_sub_params = {
+        'subscription': subscription_obj,
+        'user_cancelled': False,
+        **checkout_data
+    }
+
     user_subscription = UserSubscription.objects.filter(user=user_obj).first()
     if user_subscription:
         if user_subscription.subscription == subscription_obj:
@@ -70,12 +78,15 @@ def checkout_finalize_view(request):
             # cancel the existing subscription
             old_stripe_id = user_subscription.stripe_id
             if old_stripe_id:
-                cancel_subscription(old_stripe_id, reason='Auto ended, new membership.')
+                try:
+                    cancel_subscription(old_stripe_id, reason='Auto ended, new membership.')
+                except:
+                    pass
 
-            user_subscription.subscription = subscription_obj
-            user_subscription.stripe_id = sub_stripe_id
+            for k, v in user_sub_params.items():
+                setattr(user_subscription, k, v)
             user_subscription.save()
             return HttpResponse('User\'s plan upgraded.')
 
-    UserSubscription.objects.create(user=user_obj, subscription=subscription_obj)
+    UserSubscription.objects.create(user=user_obj, **user_sub_params)
     return render(request, 'checkout/success.html', context={'subscription': subscription_obj})
