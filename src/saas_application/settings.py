@@ -69,9 +69,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # third-party apps
+    'allauth_ui',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'widget_tweaks',
+    'slippers',
 
     # my-apps
     'commando',
