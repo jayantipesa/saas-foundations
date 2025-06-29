@@ -51,6 +51,8 @@ ALLOWED_HOSTS = [
     '.railway.app'
 ]
 
+CSRF_TRUSTED_ORIGINS = ['https://*.up.railway.app']
+
 if DEBUG:
     ALLOWED_HOSTS += [
         '127.0.0.1',
