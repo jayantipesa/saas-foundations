@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>{{ instance.username }}</div>
+    {% if perms.auth or owner %}
+        {% if perms.auth.view_user or owner%}
+            <div>
+                {{ instance.first_name }} - {{ instance.last_name}}
+                Last Login: {{ instance.last_login }}
+            </div>
+        {% endif %}
+    {% else %}
+        <div>You are not allowed to see this.</div>
+    {% endif %}
+
+{% endblock content %}

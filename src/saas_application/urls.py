@@ -22,7 +22,8 @@ from .views import (
     home_view,
     about_view,
     pw_protected_view,
-    user_only_view
+    user_only_view,
+    staff_only_view
 )
 
 urlpatterns = [
@@ -31,7 +32,9 @@ urlpatterns = [
     path('login/', auth_views.login_view, name='login_view'),
     path('register/', auth_views.register_view, name='register_view'),
     path('about/', about_view, name='about_page'),
-    path('protected/user-only', user_only_view, name='protected'),
+    path('protected/user-only', user_only_view, name='protected_user_only'),
+    path('protected/staff-only', staff_only_view, name='protected_staff_only'),
     path('protected/', pw_protected_view, name='protected'),
+    path('profiles/', include('profiles.urls')),
     path('admin/', admin.site.urls),
 ]
