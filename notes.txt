@@ -36,7 +36,7 @@
         Doing block.super will fetch and append the parent's content as well.
 
 
-    - Whitenoise:
+---> Whitenoise:
         whitenoise package is used to efficiently serve static files when your django app is deployed.
         In the development server, django itself serves the static files (like all those css, js files)
         but on a production server, when DEBUG = False, django itself won't serve these files because it
@@ -45,3 +45,62 @@
         One disadvantage of whitenoise is, you won't be able to upload any kind of user files, your codebase
         related files to the server or download it. That's why its preferred to use s3 and other services to
         serve your files instead.
+
+
+----> Working of Django Allauth social account:
+    - The Allauth package takes care of the regular as well as third party signup and sign in process.
+
+    -- How the regular signin/registration works:
+        Allauth package provides a set of urls for these endpoints, and we just direct the user to these urls.
+        The package takes care of authenticating and authorising users.
+
+        We have to mention the allauth urls in our urls.py.
+            > path('accounts/', include('allauth.urls')),
+
+    -- How the social account works:
+        Configurations:
+            - We first need to add the respective package details to our installed_apps list, etc.
+            - Once this configuration is done, then whichever third party we want to allow login to,
+              we need to go and create an Oauth App on their website.
+            - When we create an app there, we obtain client id and secret key from that app.
+                - Client id will be used by this third party app to recognise our app when some user tries to
+                  log into our website through there platform.
+                - Secret key is user to authenticate the request that will come to our website from their platform.
+            - We take these keys and put them in our database. Allauth package introduces some new tables into our db.
+              The SocialAccount table will store the third party provider information and use it when user try to login in
+              via these third party.
+            
+        Login Workflow:
+            - User clicks "Login with Google"
+            - Django allauth retrieves client_id & secret key from the database
+            - Redirects the user to Google’s OAuth page
+            - User logs in and approves permissions
+            - Google redirects back to Django with an authorization code
+            - Django allauth exchanges the code for an access token
+            - User is authenticated & logged in
+
+        New user signup workflow:
+            [ User Clicks "Sign Up with Google" ]
+                ↓
+            [ Redirect to Google OAuth ]
+                ↓
+            [ User Logs into Google ]
+                ↓
+            [ Google Asks for Permissions ]
+                ↓
+            [ Google Sends Authorization Code to Django ]
+                ↓
+            [ Django Exchanges Code for Access Token ]
+                ↓
+            [ Google Sends Access & ID Tokens ]
+                ↓
+            [ Django Extracts User Info ]
+                ↓
+            [ Check if User Exists ]
+            ↳ Yes → Log In User
+            ↳ No → Create New User
+                ↓
+            [ Redirect to Dashboard/Onboarding ]
+        
+        Doing this, our website is no longer worried about the authentication part. The third party verifies the user for us
+        and then sends us the user detail along with access token.
