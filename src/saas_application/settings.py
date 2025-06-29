@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
     'widget_tweaks',
     'slippers',
 
@@ -161,8 +162,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Django Allauth config
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+# this setting needs to be false for social login
+ACCOUNT_EMAIL_REQUIRED = False
+# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[SaasFoundations]'
 
 AUTHENTICATION_BACKENDS = [
@@ -172,8 +174,14 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend'
 ]
 
-SOCIALACCOUNT_PROVIDERS = {}
+SOCIALACCOUNT_PROVIDERS = {
+    'github': {
+        'VERIFIED_EMAIL': True
+    }
+}
 
+if not DEBUG:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL='https'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
